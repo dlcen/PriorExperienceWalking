@@ -1,0 +1,6 @@
+At t-value = 1.0699, p value = 0.09856
+At t-value = 1.044, p value = 0.09856
+At t-value = 1.0416, p value = 0.09856
+At t-value = 1.023, p value = 0.0994
+At t-value = 0.99357, p value = 0.0994
+At t-value = 0.99057, p value = 0.10168

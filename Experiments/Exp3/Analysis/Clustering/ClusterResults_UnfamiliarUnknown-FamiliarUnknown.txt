@@ -1,0 +1,1 @@
+At t-value = 0.37785, p value = 0.6436. No valid clusters found!

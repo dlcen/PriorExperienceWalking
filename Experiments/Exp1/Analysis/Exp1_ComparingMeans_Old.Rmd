@@ -1,0 +1,107 @@
+---
+title: "Experiment 1 Comparing Means"
+output: 
+      html_notebook:
+            toc: yes
+            toc_depth: 5
+            toc_float: true
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(data.table); library(multcomp); library(compute.es); library(pastecs); library(psych); library(car); library(ez); library(lsr); library(BayesFactor); library(WRS2); library(effsize)
+```
+
+```{r, echo=FALSE}
+load("../Data/meanErr.RData")
+
+deflection <- 8.5
+```
+
+```{r, echo=FALSE, message=FALSE}
+meanErr <- data.table(trial.meanErr.long)
+
+meanErr$DisplayMode <- droplevels(meanErr$DisplayMode)
+
+offset.err  <- meanErr[TrialNo %in% c(1:5) & Collection == "Old"]
+offset.mean <- offset.err[, .(meanErr = mean(meanErr, na.rm = T)), by = c("SubjectNo", "Familiarity", "DisplayMode")] 
+```
+
+# Descriptive stats
+```{r}
+offset.des.stats <- offset.mean[, .(Mean = mean(meanErr, na.rm = T), STD = sd(meanErr, na.rm = T), N = length(meanErr)), by = c("Familiarity", "DisplayMode")]
+offset.des.stats
+```
+
+# Check assumptions
+## Shapiro test
+```{r}
+by(offset.mean$meanErr, interaction(offset.mean$Familiarity, offset.mean$DisplayMode), shapiro.test)
+```
+
+## Levene's test
+```{r}
+leveneTest(offset.mean$meanErr, interaction(offset.mean$Familiarity, offset.mean$DisplayMode))
+```
+
+# One-sample test compared to the deflective power of prism on each condition
+```{r}
+by(offset.mean$meanErr, interaction(offset.mean$Familiarity, offset.mean$DisplayMode), function(x) t.test(x, mu = deflection, alternative = "less"))
+```
+
+## Try Bayesian factors for the one-sample tests
+```{r}
+by(offset.mean$meanErr, interaction(offset.mean$Familiarity, offset.mean$DisplayMode), function(x) ttestBF(x, mu = deflection, nullInterval = c(-Inf, 0)))
+
+```
+
+# Run ANOVA
+```{r}
+m <- aov(meanErr ~ Familiarity * DisplayMode, data = offset.mean)
+ms <- summary(m)[[1]]
+ms
+```
+
+## Effect size
+```{r}
+em <- etaSquared(m)
+em
+```
+
+## Try Bayesian ANOVA
+See more information about using `anovaBF` [here](https://richarddmorey.github.io/BayesFactor/#fixed)
+```{r}
+bfANOVA <- anovaBF(meanErr ~ Familiarity * DisplayMode, data = offset.mean)
+bfANOVA
+
+bfANOVA[4]/bfANOVA[3]
+```
+
+### Result summary of Bayesian ANOVA
+* Effect of *familiarity*: $BF_10$ = 1.45.
+* Effect of *target drift*: $BF_10$ = 1.25.
+* Effect of interaction: $BF_10$ = 0.39.
+
+# Compare the pairs of conditions
+## Continuous vs. Intermittent for the Familiar groups
+```{r}
+t.test(meanErr ~ DisplayMode, data = offset.mean[Familiarity == "Familiar"], paired = FALSE, var.equal = TRUE, alternative = "less")
+ttestBF(offset.mean[Familiarity == "Familiar" & DisplayMode == "Continuous"]$meanErr, offset.mean[Familiarity == "Familiar" & DisplayMode == "Intermittent"]$meanErr, paired = FALSE, nullInterval = c(-Inf, 0))
+```
+
+## Continuous vs. Intermittent for the Unfamiliar groups
+```{r}
+t.test(meanErr ~ DisplayMode, data = offset.mean[Familiarity == "Unfamiliar"], paired = FALSE, var.equal = TRUE, alternative = "less")
+ttestBF(offset.mean[Familiarity == "Unfamiliar" & DisplayMode == "Continuous"]$meanErr, offset.mean[Familiarity == "Unfamiliar" & DisplayMode == "Intermittent"]$meanErr, paired = FALSE, nullInterval = c(-Inf, 0))
+```
+
+## Familiar vs. Unfamiliar in the Continuous condition
+```{r}
+t.test(meanErr ~ Familiarity, data = offset.mean[DisplayMode == "Continuous"], paired = FALSE, var.equal = TRUE, alternative = "less" )
+ttestBF(offset.mean[Familiarity == "Familiar" & DisplayMode == "Continuous"]$meanErr, offset.mean[Familiarity == "Unfamiliar" & DisplayMode == "Continuous"]$meanErr, paired = FALSE, nullInterval = c(-Inf, 0))
+```
+
+## Familiar vs. Unfamiliar in the Intermittent condition
+```{r}
+t.test(meanErr ~ Familiarity, data = offset.mean[DisplayMode == "Intermittent"], paired = FALSE, var.equal = TRUE, alternative = "less" )
+ttestBF(offset.mean[Familiarity == "Familiar" & DisplayMode == "Intermittent"]$meanErr, offset.mean[Familiarity == "Unfamiliar" & DisplayMode == "Intermittent"]$meanErr, paired = FALSE, nullInterval = c(-Inf, 0))
+```

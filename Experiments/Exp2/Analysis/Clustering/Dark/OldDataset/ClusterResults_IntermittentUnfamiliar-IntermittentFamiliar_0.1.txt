@@ -1,0 +1,78 @@
+At t-value = 1.8856, p value = 0.04744
+At t-value = 1.8277, p value = 0.04916
+At t-value = 1.8104, p value = 0.04932
+At t-value = 1.7571, p value = 0.05128
+At t-value = 1.7254, p value = 0.05212
+At t-value = 1.6774, p value = 0.0542
+At t-value = 1.6598, p value = 0.0542
+At t-value = 1.6522, p value = 0.05492
+At t-value = 1.6506, p value = 0.05492
+At t-value = 1.6489, p value = 0.05492
+At t-value = 1.635, p value = 0.05492
+At t-value = 1.6034, p value = 0.05492
+At t-value = 1.5984, p value = 0.05708
+At t-value = 1.5885, p value = 0.05732
+At t-value = 1.5878, p value = 0.05732
+At t-value = 1.58, p value = 0.05732
+At t-value = 1.5741, p value = 0.05732
+At t-value = 1.5641, p value = 0.05732
+At t-value = 1.5539, p value = 0.05732
+At t-value = 1.5534, p value = 0.05732
+At t-value = 1.5531, p value = 0.05732
+At t-value = 1.5489, p value = 0.05732
+At t-value = 1.5476, p value = 0.05824
+At t-value = 1.5423, p value = 0.05824
+At t-value = 1.5371, p value = 0.05924
+At t-value = 1.5363, p value = 0.05924
+At t-value = 1.5319, p value = 0.06068
+At t-value = 1.5128, p value = 0.06108
+At t-value = 1.5045, p value = 0.06108
+At t-value = 1.5021, p value = 0.06108
+At t-value = 1.4956, p value = 0.06188
+At t-value = 1.493, p value = 0.06504
+At t-value = 1.4768, p value = 0.06504
+At t-value = 1.4669, p value = 0.06504
+At t-value = 1.4446, p value = 0.0658
+At t-value = 1.4221, p value = 0.0658
+At t-value = 1.421, p value = 0.06684
+At t-value = 1.3781, p value = 0.06684
+At t-value = 1.3633, p value = 0.06684
+At t-value = 1.3485, p value = 0.06824
+At t-value = 1.3444, p value = 0.06952
+At t-value = 1.3065, p value = 0.06952
+At t-value = 1.2841, p value = 0.06952
+At t-value = 1.2725, p value = 0.07116
+At t-value = 1.2638, p value = 0.07116
+At t-value = 1.2632, p value = 0.07116
+At t-value = 1.252, p value = 0.07116
+At t-value = 1.2391, the 1th p value = 0.07116
+At t-value = 1.2391, the 2th p value = 0.17588
+At t-value = 1.2134, the 1th p value = 0.07116
+At t-value = 1.2134, the 2th p value = 0.17808
+At t-value = 1.2109, the 1th p value = 0.07116
+At t-value = 1.2109, the 2th p value = 0.17808
+At t-value = 1.2099, the 1th p value = 0.07224
+At t-value = 1.2099, the 2th p value = 0.17808
+At t-value = 1.1972, the 1th p value = 0.07224
+At t-value = 1.1972, the 2th p value = 0.18188
+At t-value = 1.197, the 1th p value = 0.07424
+At t-value = 1.197, the 2th p value = 0.18188
+At t-value = 1.1907, the 1th p value = 0.07424
+At t-value = 1.1907, the 2th p value = 0.18188
+At t-value = 1.1803, the 1th p value = 0.07424
+At t-value = 1.1803, the 2th p value = 0.18532
+At t-value = 1.1783, the 1th p value = 0.07424
+At t-value = 1.1783, the 2th p value = 0.19164
+At t-value = 1.1512, the 1th p value = 0.07424
+At t-value = 1.1512, the 2th p value = 0.1932
+At t-value = 1.1182, the 1th p value = 0.07608
+At t-value = 1.1182, the 2th p value = 0.1932
+At t-value = 1.0757, the 1th p value = 0.07608
+At t-value = 1.0757, the 2th p value = 0.19728
+At t-value = 1.0504, the 1th p value = 0.07764
+At t-value = 1.0504, the 2th p value = 0.19728
+At t-value = 1.0484, the 1th p value = 0.0798
+At t-value = 1.0484, the 2th p value = 0.19728
+At t-value = 1.0021, the 1th p value = 0.08176
+At t-value = 1.0021, the 2th p value = 0.19728
+At t-value = 0.99355, p value = 0.10096

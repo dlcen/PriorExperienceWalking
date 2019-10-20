@@ -1,0 +1,211 @@
+---
+title: "Experiment 2 Comparing means"
+output: 
+      html_notebook:
+            toc: yes
+            toc_depth: 5
+            toc_float: true
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(data.table); library(multcomp); library(compute.es); library(pastecs); library(psych); library(car); library(ez); library(lsr); library(BayesFactor); library(WRS2); library(effsize)
+```
+
+```{r, echo=FALSE}
+load("../Data/meanErr.RData")
+```
+
+```{r, echo=FALSE, message=FALSE}
+meanErr <- data.table(trial.meanErr.long)
+
+meanErr$DisplayMode <- droplevels(meanErr$DisplayMode)
+
+offset.err  <- meanErr[TrialNo %in% c(1:5)]
+offset.mean <- offset.err[, .(meanErr = mean(meanErr, na.rm = T)), by = c("SubjectNo", "ExpNo", "Familiarity", "DisplayMode")] 
+```
+
+# Descriptive stats
+```{r}
+offset.des.stats <- offset.mean[, .(Mean = mean(meanErr, na.rm = T), STD = sd(meanErr, na.rm = T), N = length(meanErr)), by = c("ExpNo", "Familiarity", "DisplayMode")]
+offset.des.stats
+```
+
+# Analysis 1: Dark & Strobe: Familiarity + Drift
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+offset.mean.1 <- offset.mean[ExpNo != "Lit"]
+offset.mean.1$ExpNo <- droplevels(offset.mean.1$ExpNo)
+offset.mean.1$DisplayMode <- droplevels(offset.mean.1$DisplayMode)
+```
+
+## Check assumptions
+### Shapiro test
+```{r}
+by(offset.mean.1$meanErr, interaction(offset.mean.1$Familiarity, offset.mean.1$DisplayMode), shapiro.test)
+```
+
+### Levene's test
+```{r}
+leveneTest(offset.mean.1$meanErr, interaction(offset.mean.1$Familiarity, offset.mean.1$DisplayMode))
+```
+
+## Run ANOVA
+### Richness (Dark and Strobe) x Target drift (Continuous and Intermittent) x Familiarity (Familiar and Unfamiliar)
+```{r}
+m.1 <- aov(meanErr ~ ExpNo * Familiarity * DisplayMode, data = offset.mean.1)
+ms.1 <- summary(m.1)[[1]]
+ms.1
+```
+
+#### Effect size
+```{r}
+em <- etaSquared(m.1)
+em
+```
+
+#### Try Bayesian ANOVA
+See more information about using `anovaBF` [here](https://richarddmorey.github.io/BayesFactor/#fixed)
+```{r}
+bfANOVA.1 <- anovaBF(meanErr ~ ExpNo * Familiarity * DisplayMode, data = offset.mean.1)
+bfANOVA.1
+
+bf.interaction.rich.familiarity   <- bfANOVA.1[4]/bfANOVA.1[3]; bf.interaction.rich.familiarity
+bf.interaction.drift.familiarity  <- bfANOVA.1[13]/bfANOVA.1[7]; bf.interaction.drift.familiarity
+bf.interaction.rich.drift         <- bfANOVA.1[10]/bfANOVA.1[6]; bf.interaction.rich.drift
+bf.interaction.all                <- bfANOVA.1[18]/bfANOVA.1[17]; bf.interaction.all
+
+```
+
+* Effect of familiarity: BF10 = 4.10
+* Effect of richness: BF10 = 247.75
+* Effect of drift: BF10 = 1.20
+* Interaction between richness and familiarity: BF10 = 1.60
+* Interaction between drift and familiarity: BF10 = 0.52
+* Interaction between richness and drift: BF10 = 0.21
+
+### Richness (Dark and Strobe) x Familiarity (Familiar and Unfamiliar) in the Intermittent condition
+```{r}
+m.1.b <- aov(meanErr ~ ExpNo * Familiarity, data = offset.mean.1[DisplayMode == "Intermittent"])
+ms.1.b <- summary(m.1.b)[[1]]
+ms.1.b
+```
+
+#### Effect size
+```{r}
+em <- etaSquared(m.1.b)
+em
+```
+
+#### Try Bayesian ANOVA
+See more information about using `anovaBF` [here](https://richarddmorey.github.io/BayesFactor/#fixed)
+```{r}
+bfANOVA.1.b <- anovaBF(meanErr ~ ExpNo * Familiarity, data = offset.mean.1[DisplayMode == "Intermittent"])
+bfANOVA.1.b
+
+bf.interaction.rich.familiarity   <- bfANOVA.1.b[4]/bfANOVA.1.b[3]; bf.interaction.rich.familiarity
+
+```
+
+## Some follow-up tests
+
+From the figure, we can see that there is some effect in the *Strobe-Intermittent* condition, whereas in the *Strobe-Continuous* condition, the direction of difference between *Familiar* and *Unfamiliar* is opposite to the prediction.
+
+So first, let's have a look at the interaction between *Continuous* $\times$ *Intermittent* and *Familiar* $\times$ *Unfamiliar*
+
+### ANOVA on the Strobe data
+```{r}
+strobe.offset.mean <- offset.mean.1[ExpNo == "Strobe"]
+
+m.strobe <- aov(meanErr ~ Familiarity * DisplayMode, data = strobe.offset.mean)
+ms.strobe <- summary(m.strobe)[[1]]
+ms.strobe
+```
+
+#### Effect size
+```{r}
+em <- etaSquared(m.strobe)
+em
+```
+
+#### Try Bayesian 
+```{r}
+bfANOVA.strobe <- anovaBF(meanErr ~ Familiarity * DisplayMode, data = strobe.offset.mean)
+bfANOVA.strobe
+
+bfANOVA.strobe[4]/bfANOVA.strobe[3]
+```
+
+> So there may be an interaction between *Continuous* $\times$ *Intermittent* and *Familiar* $\times$ *Unfamiliar* in the Strobe condition - it is just short of significance.
+
+Maybe this is sufficient to look at the familiarity effects in *Continuous* and *Intermittent* conditioins respectively.
+
+#### Familiarity effect in the *Strobe-Continuous* condition
+```{r}
+t.test(meanErr ~ Familiarity, data = strobe.offset.mean[DisplayMode == "Continuous"], var.equal = TRUE, alternative = "less")
+ttestBF(strobe.offset.mean[Familiarity == "Familiar" & DisplayMode == "Continuous"]$meanErr, strobe.offset.mean[Familiarity == "Unfamiliar" & DisplayMode == "Continuous"]$meanErr, paired = FALSE, nullInterval = c(-Inf, 0))
+```
+
+> No, there is no difference
+
+#### Familiarity effect in the *Strobe-Intermittent* condition
+```{r}
+t.test(meanErr ~ Familiarity, data = strobe.offset.mean[DisplayMode == "Intermittent"], paired = FALSE, var.equal = TRUE, alternative = "less")
+
+ttestBF(strobe.offset.mean[Familiarity == "Familiar" & DisplayMode == "Intermittent"]$meanErr, strobe.offset.mean[Familiarity == "Unfamiliar" & DisplayMode == "Intermittent"]$meanErr, paired = FALSE, nullInterval = c(-Inf, 0))
+```
+
+> So, the *Unfamiliar* group's trajectories are significantly more curved than those of the *Familiar* group.
+
+
+# Analysis 2: Dark & Strobe & Lit: Familiarity
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+offset.mean.2 <- offset.mean[DisplayMode != "Intermittent"]
+offset.mean.2$DisplayMode <- droplevels(offset.mean.2$DisplayMode)
+```
+
+## Check assumptions
+### Shapiro test
+```{r}
+by(offset.mean.2$meanErr, interaction(offset.mean.2$Familiarity, offset.mean.2$ExpNo), shapiro.test)
+```
+
+### Levene's test
+```{r}
+leveneTest(offset.mean.2$meanErr, interaction(offset.mean.2$Familiarity, offset.mean.2$ExpNo))
+```
+
+## Run ANOVA
+```{r}
+m.2 <- aov(meanErr ~ ExpNo * Familiarity, data = offset.mean.2)
+ms.2 <- summary(m.2)[[1]]
+ms.2
+```
+
+### Effect size
+```{r}
+em <- etaSquared(m.2)
+em
+```
+
+### Try Bayesian ANOVA
+See more information about using `anovaBF` [here](https://richarddmorey.github.io/BayesFactor/#fixed)
+```{r}
+bfANOVA.2 <- anovaBF(meanErr ~ Familiarity * ExpNo, data = offset.mean.2)
+bfANOVA.2
+
+bfANOVA.2[4]/bfANOVA.2[3]
+```
+
+* Effect of *familiarity*: BF10 = 0.28
+* Effect of *Richness*: BF10 > 100
+* Effect of interaction: BF10 = 0.61
+
+
+#### Familiarity effect in the *Lit* condition
+```{r}
+t.test(meanErr ~ Familiarity, data = offset.mean.2[ExpNo == "Lit"], paired = FALSE, var.equal = TRUE, alternative = "less")
+
+ttestBF(offset.mean.2[ExpNo == "Lit" & Familiarity == "Familiar"]$meanErr, offset.mean.2[ExpNo == "Lit" & Familiarity == "Unfamiliar"]$meanErr, paired = FALSE, nullInterval = c(-Inf, 0))
+```
+
+
+

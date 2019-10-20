@@ -1,0 +1,67 @@
+---
+title: "Experiment 3: Target location"
+output: 
+      html_notebook:
+            toc: yes
+            toc_depth: 5
+            toc_float: true
+---
+
+```{r, echo=FALSE, message = FALSE, warning=FALSE}
+library(data.table); library(BayesFactor); library(WRS2); library(compute.es); library(pastecs); library(psych); library(ez); library(effsize); library(multcomp); library(car)
+```
+
+```{r load data,echo=FALSE}
+load("../Data/meanErr.RData")
+
+deflection <- 8.5
+
+meanErr <- data.table(trial.meanErr.long)
+
+meanErr[Familiarity == "Unfamiliar"]$TargetPosition <- "Unknown"
+
+offset.err  <- meanErr[TrialNo %in% c(1:5)]
+offset.mean <- offset.err[, .(meanErr = mean(meanErr, na.rm = T)), by = c("SubjectNo", "Familiarity", "TargetPosition", "PrismDirection")]
+```
+
+```{r Check sample size,echo=FALSE}
+offset.des.stats <- offset.mean[, .(mean = mean(meanErr, na.rm = T), std = sd(meanErr, na.rm = T), n = length(as.character(unique(SubjectNo))) ), by = list(Familiarity, TargetPosition)]
+offset.des.stats
+```
+
+**Checking assumptions**
+```{r}
+by(offset.mean$meanErr, interaction(offset.mean$Familiarity, offset.mean$TargetPosition), shapiro.test)
+
+leveneTest(offset.mean$meanErr, interaction(offset.mean$Familiarity, offset.mean$TargetPosition))
+```
+
+
+# Test the difference between *familiar (target known)* group and *unfamiliar* group
+```{r}
+ind.t.known <- t.test(meanErr ~ Familiarity, data = offset.mean[TargetPosition == "Known" | Familiarity == "Unfamiliar"], paired = FALSE, var.equal = TRUE, alternative = "less")
+ind.t.known
+
+ttestBF(offset.mean[TargetPosition == "Known" & Familiarity == "Familiar"]$meanErr, offset.mean[Familiarity == "Unfamiliar"]$meanErr, paired = FALSE, nullInterval = c(-Inf, 0))
+```
+
+
+# Test the difference between *familiar (target unknown)* group and *unfamiliar* group
+```{r}
+ind.t.known <- t.test(meanErr ~ Familiarity, data = offset.mean[TargetPosition == "Unknown"], paired = FALSE, var.equal = TRUE)
+ind.t.known
+
+ttestBF(offset.mean[TargetPosition == "Unknown" & Familiarity == "Familiar"]$meanErr, offset.mean[Familiarity == "Unfamiliar"]$meanErr, paired = FALSE)
+```
+
+# Test the difference between the two *familiar* groups
+```{r}
+ind.t.familiar <- t.test(meanErr ~ TargetPosition, data = offset.mean[Familiarity == "Familiar"], paired = FALSE, var.equal = TRUE, alternative = "greater")
+ind.t.familiar
+
+ttestBF(offset.mean[TargetPosition == "Unknown" & Familiarity == "Familiar"]$meanErr, offset.mean[TargetPosition == "Known" & Familiarity == "Familiar"]$meanErr, paired = FALSE, nullInterval = c(0, Inf))
+```
+
+
+
+
